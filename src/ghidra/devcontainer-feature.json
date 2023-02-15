@@ -1,0 +1,50 @@
+{
+    "name": "ghidra (from github)",
+    "id": "ghidra",
+    "version": "1.0.0",
+    "description": "A feature to install the latest or specified Ghidra version from GitHub releases",
+    "documentationURL": "https://github.com/clearbluejar/ghidra-feature",
+    "options": {
+        "ghidra_version": {
+            "type": "string",
+            "proposals": [
+                "latest",
+                "10.2.3",
+                "10.2.1",
+                "10.1.4"
+            ],
+            "default": "latest",
+            "description": "Version of Ghidra to install"
+        },
+        "ghidra_install_dir": {
+            "type": "string",
+            "proposals": [
+                "/ghidra",
+                "~/ghidra"
+            ],
+            "default": "/ghidra",
+            "description": "Default Install Directory"
+        },
+        "username": {
+            "type": "string",
+            "proposals": [
+                "vscode",
+                "root"
+            ],
+            "default": "vscode",
+            "description": "Username to own the Ghidra install directory."
+        },
+        "update_rc": {
+            "type": "boolean",
+            "proposals": [
+                "true",
+                "root"
+            ],
+            "default": "vscode",
+            "description": "Username to own the Ghidra install directory."
+        },
+    },
+    "installsAfter": [
+        "ghcr.io/devcontainers/features/common-utils"
+    ]
+}
