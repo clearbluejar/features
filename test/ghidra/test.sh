@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # This test file will be executed against an auto-generated devcontainer.json that
-# includes the 'hello' Feature with no options.
+# includes the 'ghidra' Feature with no options.
 #
 # For more information, see: https://github.com/devcontainers/cli/blob/main/docs/features/test.md
 #
@@ -9,26 +9,26 @@
 # {
 #    "image": "<..some-base-image...>",
 #    "features": {
-#      "hello": {}
+#      "color": {}
 #    },
 #    "remoteUser": "root"
 # }
 #
-# Thus, the value of all options will fall back to the default value in 
-# the Feature's 'devcontainer-feature.json'.
-# For the 'hello' feature, that means the default favorite greeting is 'hey'.
+# Thus, the value of all options will fall back to the default value in the
+# Feature's 'devcontainer-feature.json'.
+# For the 'color' feature, that means the default favorite color is 'red'.
 #
 # These scripts are run as 'root' by default. Although that can be changed
 # with the '--remote-user' flag.
 # 
 # This test can be run with the following command:
 #
-#    devcontainer features test \ 
-#                   --features hello   \
-#                   --remote-user root \
-#                   --skip-scenarios   \
-#                   --base-image mcr.microsoft.com/devcontainers/base:ubuntu \
-#                   /path/to/this/repo
+#    devcontainer features test    \ 
+#               --features color   \
+#               --remote-user root \
+#               --skip-scenarios   \
+#               --base-image mcr.microsoft.com/devcontainers/base:ubuntu \
+#               /path/to/this/repo
 
 set -e
 
@@ -38,8 +38,10 @@ source dev-container-features-test-lib
 
 # Feature-specific tests
 # The 'check' command comes from the dev-container-features-test-lib.
-check "execute command" bash -c "hello | grep 'hey, $(whoami)!'"
 
-# Report results
+check "default GHIDRA_INSTALL_DIR" env | grep 'GHIDRA_INSTALL_DIR=/ghidra'
+check "env GHIDRA_VERSION" env | grep 'GHIDRA_VERSION'
+
+# Report result
 # If any of the checks above exited with a non-zero exit code, the test will fail.
 reportResults

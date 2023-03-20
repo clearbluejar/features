@@ -1,5 +1,5 @@
 {
-    "name": "ghidra (from github)",
+    "name": "Install Ghidra SRE Release",
     "id": "ghidra",
     "version": "1.0.0",
     "description": "A feature to install the latest or specified Ghidra version from GitHub releases",
@@ -36,13 +36,9 @@
         },
         "update_rc": {
             "type": "boolean",
-            "proposals": [
-                "true",
-                "root"
-            ],
-            "default": "vscode",
-            "description": "Username to own the Ghidra install directory."
-        },
+            "default": true,
+            "description": "Whether or not to persist GHIDRA_VERSION and GHIDRA_INSTALL_DIR in bashrc or zshrc"
+        }
     },
     "installsAfter": [
         "ghcr.io/devcontainers/features/common-utils"

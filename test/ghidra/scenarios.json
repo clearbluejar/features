@@ -1,9 +1,9 @@
 {
-    "hello": {
+    "check_10_2_2_installed": {
         "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
         "features": {
-            "hello": {
-                "greeting": "hello"
+            "ghidra": {
+                "ghidra_version": "10.2.2"
             }
         }
     }

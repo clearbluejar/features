@@ -10,10 +10,10 @@
 # Syntax: ./ghidra-install.sh [Ghidra Version] [Ghidra Install Dir] [non-root user] [Update rc files flag]
 
 
-GHIDRA_VERSION=${1:-"latest"} # 'system' checks the base image first, else installs 'latest'
-GHIDRA_INSTALL_DIR=${2:-"/ghidra"} #defaults to /ghidra
-USERNAME=${3:-"automatic"}
-UPDATE_RC=${4:-"true"} #allows for custom env variables in login shell
+GHIDRA_VERSION="${GHIDRA_VERSION:-"latest"}"
+GHIDRA_INSTALL_DIR="${GHIDRA_INSTALL_DIR:-"/ghidra"}"
+USERNAME="${USERNAME:-"${_REMOTE_USER:-"automatic"}"}"
+UPDATE_RC="${UPDATE_RC:-"true"}" #allows for custom env variables in login shell
 
 set -e
 
@@ -57,14 +57,36 @@ updaterc() {
     fi
 }
 
+apt_get_update()
+{
+    if [ "$(find /var/lib/apt/lists/* | wc -l)" = "0" ]; then
+        echo "Running apt-get update..."
+        apt-get update -y
+    fi
+}
+
+# Checks if packages are installed and installs them if not
+check_packages() {
+    if ! dpkg -s "$@" > /dev/null 2>&1; then
+        apt_get_update
+        apt-get -y install --no-install-recommends "$@"
+    fi
+}
+
+# Ensure apt is in non-interactive to avoid prompts
+export DEBIAN_FRONTEND=noninteractive
+
+# Install dependencies
+check_packages ca-certificates curl jq unzip
+
 set +e
 # Download latest Ghidra, or specific version
 if [ "${GHIDRA_VERSION}" == "latest" ]; then
-    GHIDRA_DOWNLOAD_URL=$(curl -s https://api.github.com/repos/NationalSecurityAgency/ghidra/releases/latest | jq -r ".assets[] | .browser_download_url")
+    GHIDRA_DOWNLOAD_URL=$(curl -Ss https://api.github.com/repos/NationalSecurityAgency/ghidra/releases/latest | jq -r ".assets[] | .browser_download_url")
     
     GHIDRA_VERSION="$(echo ${GHIDRA_DOWNLOAD_URL} | cut -d_ -f 2)"
 else
-    GHIDRA_DOWNLOAD_URL=$(curl -s https://api.github.com/repos/NationalSecurityAgency/ghidra/releases | jq -r ".[] | .assets[] | .browser_download_url" | grep "${GHIDRA_VERSION}")
+    GHIDRA_DOWNLOAD_URL=$(curl -Ss https://api.github.com/repos/NationalSecurityAgency/ghidra/releases | jq -r ".[] | .assets[] | .browser_download_url" | grep "${GHIDRA_VERSION}")
 fi
 set -e
 
@@ -85,7 +107,7 @@ mkdir -p /tmp/ghidra-tmp
 cd /tmp/ghidra-tmp
 
 # Download Ghidra
-wget $GHIDRA_DOWNLOAD_URL
+curl -vLSO --remote-name $GHIDRA_DOWNLOAD_URL
 unzip $(basename $GHIDRA_DOWNLOAD_URL)
 
 # Move base ghidra_<version>_PUBLIC to $GHIDRA_INSTALL_DIR

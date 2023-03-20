@@ -10,7 +10,9 @@ source dev-container-features-test-lib
 
 # Feature-specific tests
 # The 'check' command comes from the dev-container-features-test-lib.
-check "execute command" bash -c "color | grep 'my favorite color is gold'"
+env
+check "default GHIDRA_INSTALL_DIR" env | grep 'GHIDRA_INSTALL_DIR=/ghidra'
+check "env GHIDRA_VERSION" env | grep 'GHIDRA_VERSION=10.2.2'
 
 # Report result
 # If any of the checks above exited with a non-zero exit code, the test will fail.
