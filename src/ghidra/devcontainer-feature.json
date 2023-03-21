@@ -1,9 +1,9 @@
 {
     "name": "Install Ghidra SRE Release",
     "id": "ghidra",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "description": "A feature to install the latest or specified Ghidra version from GitHub releases",
-    "documentationURL": "https://github.com/clearbluejar/ghidra-feature",
+    "documentationURL": "https://github.com/clearbluejar/features/ghidra",
     "options": {
         "ghidra_version": {
             "type": "string",
