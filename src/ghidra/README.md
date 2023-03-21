@@ -7,7 +7,7 @@ A feature to install the latest or specified Ghidra version from GitHub releases
 
 ```json
 "features": {
-    "ghcr.io/clearbluejar/ghidra-feature/ghidra:1": {}
+    "ghcr.io/clearbluejar/features/ghidra:1": {}
 }
 ```
 
@@ -24,4 +24,4 @@ A feature to install the latest or specified Ghidra version from GitHub releases
 
 ---
 
-_Note: This file was auto-generated from the [devcontainer-feature.json](https://github.com/clearbluejar/ghidra-feature/blob/main/src/ghidra/devcontainer-feature.json).  Add additional notes to a `NOTES.md`._
+_Note: This file was auto-generated from the [devcontainer-feature.json](https://github.com/clearbluejar/features/blob/main/src/ghidra/devcontainer-feature.json).  Add additional notes to a `NOTES.md`._
