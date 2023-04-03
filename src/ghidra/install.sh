@@ -114,7 +114,18 @@ unzip $(basename $GHIDRA_DOWNLOAD_URL)
 mv "$(echo $(basename $GHIDRA_DOWNLOAD_URL) | cut -d_ -f 1-3)" $GHIDRA_INSTALL_DIR
 chown -R ${USERNAME}:${USERNAME} ${GHIDRA_INSTALL_DIR}
 
-# Clean up 
+# Ghidra doesn't provide arm64 native binaries
+# build native to ensure performant Ghidra 
+if uname -a | grep -q 'aarch64'; then
+    # need grandle and Java to build
+    if command -v java & command -v gradle; then
+        $GHIDRA_INSTALL_DIR/support/buildNatives
+    else
+        echo "WARNING: Native binaries missing for arch: run $GHIDRA_INSTALL_DIR/support/buildNatives after installing java and gradle"
+    fi
+fi
+
+# Clean up
 rm -rf /tmp/ghidra-tmp
 
 # Make GHIDRA ENV vars availble to bash and zsh shells
