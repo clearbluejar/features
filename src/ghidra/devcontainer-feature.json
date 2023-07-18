@@ -1,7 +1,7 @@
 {
     "name": "Install Ghidra SRE Release",
     "id": "ghidra",
-    "version": "1.1.0",
+    "version": "1.2.0",
     "description": "A feature to install the latest or specified Ghidra version from GitHub releases",
     "documentationURL": "https://github.com/clearbluejar/features/ghidra",
     "options": {
@@ -9,6 +9,7 @@
             "type": "string",
             "proposals": [
                 "latest",
+                "10.3.2",
                 "10.2.3",
                 "10.2.1",
                 "10.1.4"

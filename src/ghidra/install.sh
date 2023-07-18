@@ -112,7 +112,6 @@ unzip $(basename $GHIDRA_DOWNLOAD_URL)
 
 # Move base ghidra_<version>_PUBLIC to $GHIDRA_INSTALL_DIR
 mv "$(echo $(basename $GHIDRA_DOWNLOAD_URL) | cut -d_ -f 1-3)" $GHIDRA_INSTALL_DIR
-chown -R ${USERNAME}:${USERNAME} ${GHIDRA_INSTALL_DIR}
 
 # Ghidra doesn't provide arm64 native binaries
 # build native to ensure performant Ghidra 
@@ -124,6 +123,9 @@ if uname -a | grep -q 'aarch64'; then
         echo "WARNING: Native binaries missing for arch: run $GHIDRA_INSTALL_DIR/support/buildNatives after installing java and gradle"
     fi
 fi
+
+# set permissions for user
+chown -R ${USERNAME}:${USERNAME} ${GHIDRA_INSTALL_DIR}
 
 # Clean up
 rm -rf /tmp/ghidra-tmp
