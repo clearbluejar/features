@@ -86,7 +86,7 @@ if [ "${GHIDRA_VERSION}" == "latest" ]; then
     
     GHIDRA_VERSION="$(echo ${GHIDRA_DOWNLOAD_URL} | cut -d_ -f 2)"
 else
-    GHIDRA_DOWNLOAD_URL=$(curl -Ss https://api.github.com/repos/NationalSecurityAgency/ghidra/releases | jq -r ".[] | .assets[] | .browser_download_url" | grep "${GHIDRA_VERSION}")
+    GHIDRA_DOWNLOAD_URL=$(curl -Ss https://api.github.com/repos/NationalSecurityAgency/ghidra/releases | jq -r ".[] | .assets[] | .browser_download_url" | fgrep "${GHIDRA_VERSION}")
 fi
 set -e
 
