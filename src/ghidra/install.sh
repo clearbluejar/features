@@ -122,7 +122,7 @@ if uname -a | grep -q 'aarch64'; then
         then
             $GHIDRA_INSTALL_DIR/support/buildNatives
         else
-            pushd $GHIDRA_INSTALL_DIR/support/
+            pushd $GHIDRA_INSTALL_DIR/support/gradle/
             gradle buildNatives
             popd
         fi
