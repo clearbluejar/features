@@ -118,7 +118,15 @@ mv "$(echo $(basename $GHIDRA_DOWNLOAD_URL) | cut -d_ -f 1-3)" $GHIDRA_INSTALL_D
 if uname -a | grep -q 'aarch64'; then
     # need grandle and Java to build
     if command -v java & command -v gradle; then
-        $GHIDRA_INSTALL_DIR/support/buildNatives
+        if [ -e $GHIDRA_INSTALL_DIR/support/buildNatives ]
+        then
+            $GHIDRA_INSTALL_DIR/support/buildNatives
+        else
+            pushd $GHIDRA_INSTALL_DIR/support/
+            gradle buildNatives
+            popd
+        fi
+        
     else
         echo "WARNING: Native binaries missing for arch: run $GHIDRA_INSTALL_DIR/support/buildNatives after installing java and gradle"
     fi
