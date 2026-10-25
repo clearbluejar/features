@@ -1,0 +1,32 @@
+{
+    "name": "Patch and rebuild the Ghidra decompiler",
+    "id": "ghidra-decompiler-patch",
+    "version": "1.0.0",
+    "description": "Applies a patch to the decompiler C++ source shipped inside an existing Ghidra install and rebuilds the native binaries, so Ghidra runs the patched decompiler. Layer it on top of a prebuilt Ghidra image (e.g. ghcr.io/clearbluejar/ghidra-python). Bundles the diff-stable default variable name patch (NationalSecurityAgency/ghidra#10025).",
+    "documentationURL": "https://github.com/clearbluejar/features/tree/main/src/ghidra-decompiler-patch",
+    "options": {
+        "patch": {
+            "type": "string",
+            "proposals": [
+                "diffstable-varnames",
+                "none"
+            ],
+            "default": "diffstable-varnames",
+            "description": "Bundled patch to apply. 'none' applies only patch_url."
+        },
+        "patch_url": {
+            "type": "string",
+            "default": "",
+            "description": "URL of an additional unified diff (git format-patch, -p1 relative to the Ghidra install dir) applied after the bundled patch."
+        },
+        "ghidra_install_dir": {
+            "type": "string",
+            "default": "",
+            "description": "Ghidra install directory. Defaults to $GHIDRA_INSTALL_DIR from the image, then /ghidra."
+        }
+    },
+    "installsAfter": [
+        "ghcr.io/devcontainers/features/java",
+        "ghcr.io/clearbluejar/features/ghidra"
+    ]
+}

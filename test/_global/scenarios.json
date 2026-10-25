@@ -1,18 +1,42 @@
 {
-    "check_10_2_2_installed": {
-        "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
-        "features": {
-            "ghidra": {
-                "ghidra_version": "10.2.2"
-            }
-        }
-    },
     "check_11_2_installed": {
         "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
         "features": {
             "ghidra": {
                 "ghidra_version": "11.2"
             }
+        }
+    },
+    "check_12_2_installed": {
+        "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
+        "features": {
+            "ghcr.io/devcontainers/features/java:1": {
+                "version": "25"
+            },
+            "ghidra": {
+                "ghidra_version": "12.2"
+            }
+        }
+    },
+    "check_12_1_prefix_resolves": {
+        "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
+        "features": {
+            "ghidra": {
+                "ghidra_version": "12.1"
+            }
+        }
+    },
+    "decompiler_patch_with_fresh_ghidra_install": {
+        "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
+        "features": {
+            "ghcr.io/devcontainers/features/java:1": {
+                "version": "21",
+                "installGradle": true
+            },
+            "ghidra": {
+                "ghidra_version": "12.1.4"
+            },
+            "ghidra-decompiler-patch": {}
         }
     }
 }

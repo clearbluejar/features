@@ -1,0 +1,9 @@
+{
+    "on_prebuilt_image": {
+        "image": "ghcr.io/clearbluejar/ghidra-python:12.1.2ghidra3.13python-trixie",
+        "features": {
+            "ghidra-decompiler-patch": {}
+        },
+        "remoteUser": "vscode"
+    }
+}

@@ -1,21 +1,19 @@
 {
     "name": "Install Ghidra SRE Release",
     "id": "ghidra",
-    "version": "1.4.1",
-    "description": "A feature to install the latest or specified Ghidra version from GitHub releases",
+    "version": "1.5.0",
+    "description": "Install a Ghidra release from GitHub (latest or a specific version). Builds the native binaries on linux arm64 and checks the JDK against the release's application.java.min.",
     "documentationURL": "https://github.com/clearbluejar/features/ghidra",
     "options": {
         "ghidra_version": {
             "type": "string",
             "proposals": [
                 "latest",
-                "11.2",
-                "11.1.2",
-                "11.0",
-                "10.3.2",
-                "10.2.3",
-                "10.2.1",
-                "10.1.4"
+                "12.2",
+                "12.1.4",
+                "12.0.4",
+                "11.4.3",
+                "11.3.2"
             ],
             "default": "latest",
             "description": "Version of Ghidra to install"
@@ -42,9 +40,15 @@
             "type": "boolean",
             "default": true,
             "description": "Whether or not to persist GHIDRA_VERSION and GHIDRA_INSTALL_DIR in bashrc or zshrc"
+        },
+        "build_natives": {
+            "type": "boolean",
+            "default": false,
+            "description": "Rebuild the Ghidra native binaries (decompile, sleigh, ...) from the shipped source even on platforms where the release provides them. Always done on linux arm64. To patch the decompiler see the ghidra-decompiler-patch feature."
         }
     },
     "installsAfter": [
-        "ghcr.io/devcontainers/features/common-utils"
+        "ghcr.io/devcontainers/features/common-utils",
+        "ghcr.io/devcontainers/features/java"
     ]
 }
