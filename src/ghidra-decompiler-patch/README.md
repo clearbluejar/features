@@ -19,6 +19,7 @@ Applies a patch to the decompiler C++ source shipped inside an existing Ghidra i
 | patch_url | URL of an additional unified diff (git format-patch, -p1 relative to the Ghidra install dir) applied after the bundled patch. | string | - |
 | ghidra_install_dir | Ghidra install directory. Defaults to $GHIDRA_INSTALL_DIR from the image, then /ghidra. | string | - |
 
+
 ## What it does
 
 Every Ghidra release ships the decompiler C++ source (`Ghidra/Features/Decompiler/src/decompile/cpp`) and a
