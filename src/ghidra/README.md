@@ -21,7 +21,6 @@ Install a Ghidra release from GitHub (latest or a specific version). Builds the 
 | update_rc | Whether or not to persist GHIDRA_VERSION and GHIDRA_INSTALL_DIR in bashrc or zshrc | boolean | true |
 | build_natives | Rebuild the Ghidra native binaries (decompile, sleigh, ...) from the shipped source even on platforms where the release provides them. Always done on linux arm64. To patch the decompiler see the ghidra-decompiler-patch feature. | boolean | false |
 
-
 ## Java version
 
 Ghidra only starts on a JDK that satisfies `application.java.min` of the release (21 for 11.2 through 12.1.4,
@@ -39,9 +38,10 @@ warns. The feature declares `installsAfter` the `java` feature, so listing both 
 ## Release lookup
 
 Versions are resolved against the exact release tag (`Ghidra_<version>_build`), so `"12.1"` installs 12.1,
-not 12.1.4. The GitHub API allows 60 unauthenticated requests per hour per IP; if many images build in
-parallel from one address, pass a `GITHUB_TOKEN` build argument or environment variable and the feature
-will use it. A failed lookup prints the API message and aborts the build.
+not 12.1.4. The GitHub API is tried first (a `GITHUB_TOKEN` environment variable, if present, lifts the
+60 requests/hour unauthenticated limit). If the API call fails, typically rate-limited when many images build
+in parallel from shared CI runner IPs, the asset is resolved from the release page on github.com instead,
+which has no API quota. Only when both fail does the build abort with the reason.
 
 ## Native binaries
 

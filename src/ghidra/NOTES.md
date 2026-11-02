@@ -16,9 +16,10 @@ warns. The feature declares `installsAfter` the `java` feature, so listing both 
 ## Release lookup
 
 Versions are resolved against the exact release tag (`Ghidra_<version>_build`), so `"12.1"` installs 12.1,
-not 12.1.4. The GitHub API allows 60 unauthenticated requests per hour per IP; if many images build in
-parallel from one address, pass a `GITHUB_TOKEN` build argument or environment variable and the feature
-will use it. A failed lookup prints the API message and aborts the build.
+not 12.1.4. The GitHub API is tried first (a `GITHUB_TOKEN` environment variable, if present, lifts the
+60 requests/hour unauthenticated limit). If the API call fails, typically rate-limited when many images build
+in parallel from shared CI runner IPs, the asset is resolved from the release page on github.com instead,
+which has no API quota. Only when both fail does the build abort with the reason.
 
 ## Native binaries
 

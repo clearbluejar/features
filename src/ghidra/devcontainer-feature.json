@@ -1,7 +1,7 @@
 {
     "name": "Install Ghidra SRE Release",
     "id": "ghidra",
-    "version": "1.5.0",
+    "version": "1.5.1",
     "description": "Install a Ghidra release from GitHub (latest or a specific version). Builds the native binaries on linux arm64 and checks the JDK against the release's application.java.min.",
     "documentationURL": "https://github.com/clearbluejar/features/ghidra",
     "options": {
