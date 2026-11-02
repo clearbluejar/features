@@ -21,6 +21,7 @@ Install a Ghidra release from GitHub (latest or a specific version). Builds the 
 | update_rc | Whether or not to persist GHIDRA_VERSION and GHIDRA_INSTALL_DIR in bashrc or zshrc | boolean | true |
 | build_natives | Rebuild the Ghidra native binaries (decompile, sleigh, ...) from the shipped source even on platforms where the release provides them. Always done on linux arm64. To patch the decompiler see the ghidra-decompiler-patch feature. | boolean | false |
 
+
 ## Java version
 
 Ghidra only starts on a JDK that satisfies `application.java.min` of the release (21 for 11.2 through 12.1.4,
