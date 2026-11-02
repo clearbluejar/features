@@ -85,28 +85,42 @@ export DEBIAN_FRONTEND=noninteractive
 # Install dependencies
 check_packages ca-certificates curl jq unzip
 
-# Resolve the release asset. A GITHUB_TOKEN (if present) raises the unauthenticated API rate limit of 60/hour,
-# which parallel image builds can exhaust.
+# Resolve the release asset. The API is tried first (a GITHUB_TOKEN, if present, lifts the 60 req/h
+# unauthenticated limit); if it fails, e.g. rate-limited when many images build in parallel from shared
+# CI runner IPs, fall back to the release page on github.com, which has no API quota.
+GITHUB_API_URL="${GITHUB_API_URL:-https://api.github.com}"
+GHIDRA_REPO="NationalSecurityAgency/ghidra"
+CURL_RETRY=(--retry 3 --retry-delay 2 --retry-all-errors)
 github_api() {
     if [ -n "${GITHUB_TOKEN:-}" ]; then
-        curl -fsSL -H "Authorization: Bearer ${GITHUB_TOKEN}" -H "Accept: application/vnd.github+json" "$1"
+        curl -fsSL "${CURL_RETRY[@]}" -H "Authorization: Bearer ${GITHUB_TOKEN}" -H "Accept: application/vnd.github+json" "$1"
     else
-        curl -fsSL -H "Accept: application/vnd.github+json" "$1"
+        curl -fsSL "${CURL_RETRY[@]}" -H "Accept: application/vnd.github+json" "$1"
     fi
 }
 if [ "${GHIDRA_VERSION}" = "latest" ]; then
-    RELEASE_JSON="$(github_api "https://api.github.com/repos/NationalSecurityAgency/ghidra/releases/latest")" || RELEASE_JSON=""
+    RELEASE_TAG="latest"
+    RELEASE_JSON="$(github_api "${GITHUB_API_URL}/repos/${GHIDRA_REPO}/releases/latest" 2>/dev/null)" || RELEASE_JSON=""
 else
     # Exact match on the release tag: a bare "12.1" must not resolve to 12.1.2, 12.1.3, ...
-    RELEASE_JSON="$(github_api "https://api.github.com/repos/NationalSecurityAgency/ghidra/releases/tags/Ghidra_${GHIDRA_VERSION}_build")" || RELEASE_JSON=""
+    RELEASE_TAG="Ghidra_${GHIDRA_VERSION}_build"
+    RELEASE_JSON="$(github_api "${GITHUB_API_URL}/repos/${GHIDRA_REPO}/releases/tags/${RELEASE_TAG}" 2>/dev/null)" || RELEASE_JSON=""
 fi
 GHIDRA_DOWNLOAD_URL="$(printf '%s' "${RELEASE_JSON}" | jq -r '[.assets[]? | .browser_download_url | select(test("/ghidra_.*_PUBLIC_.*\\.zip$"))] | first // empty' 2>/dev/null)"
 if [ -z "${GHIDRA_DOWNLOAD_URL}" ]; then
-    echo "Error: could not resolve a Ghidra release asset for version '${GHIDRA_VERSION}'."
     MSG="$(printf '%s' "${RELEASE_JSON}" | jq -r '.message // empty' 2>/dev/null)"
-    [ -n "${MSG}" ] && echo "GitHub API: ${MSG}"
-    echo "Check https://github.com/NationalSecurityAgency/ghidra/releases for valid versions (e.g. 12.2, 12.1.4)."
-    echo "If the API rate limit was hit, retry later or set GITHUB_TOKEN."
+    echo "GitHub API lookup failed${MSG:+ (${MSG})}; resolving via the release page instead..."
+    if [ "${RELEASE_TAG}" = "latest" ]; then
+        RELEASE_TAG="$(curl -fsSI "${CURL_RETRY[@]}" -o /dev/null -w '%{redirect_url}' "https://github.com/${GHIDRA_REPO}/releases/latest" | sed -E 's#.*/tag/##')"
+    fi
+    if [ -n "${RELEASE_TAG}" ]; then
+        GHIDRA_DOWNLOAD_URL="$(curl -fsSL "${CURL_RETRY[@]}" "https://github.com/${GHIDRA_REPO}/releases/expanded_assets/${RELEASE_TAG}" 2>/dev/null \
+            | grep -oE 'href="[^"]*/ghidra_[^"]*_PUBLIC_[^"]*\.zip"' | head -n 1 | sed -E 's/^href="([^"]*)"$/\1/; s#^/#https://github.com/#')"
+    fi
+fi
+if [ -z "${GHIDRA_DOWNLOAD_URL}" ]; then
+    echo "Error: could not resolve a Ghidra release asset for version '${GHIDRA_VERSION}'."
+    echo "Check https://github.com/${GHIDRA_REPO}/releases for valid versions (e.g. 12.2, 12.1.4)."
     exit 1
 fi
 # ghidra_<version>_PUBLIC_<date>.zip
@@ -127,7 +141,7 @@ mkdir -p /tmp/ghidra-tmp
 cd /tmp/ghidra-tmp
 
 # Download Ghidra
-curl -fLSs --remote-name "$GHIDRA_DOWNLOAD_URL"
+curl -fLSs "${CURL_RETRY[@]}" --remote-name "$GHIDRA_DOWNLOAD_URL"
 unzip -q "$(basename "$GHIDRA_DOWNLOAD_URL")"
 
 # Move base ghidra_<version>_PUBLIC to $GHIDRA_INSTALL_DIR
@@ -174,12 +188,12 @@ build_natives() {
         "${GHIDRA_INSTALL_DIR}/support/buildNatives"
     else
         pushd "${GHIDRA_INSTALL_DIR}/support/gradle/" > /dev/null
-        GRADLE_USER_HOME=/tmp/ghidra-tmp/gradle gradle buildNatives --no-daemon -q
+        GRADLE_USER_HOME=/tmp/ghidra-tmp/gradle gradle buildNatives --no-daemon --no-watch-fs -q
         popd > /dev/null
     fi
     # Drop intermediate objects and gradle caches; only the executables under build/os/<platform>/ are needed.
-    find "${GHIDRA_INSTALL_DIR}" -type d -name build -exec sh -c 'rm -rf "$1/objs" "$1/tmp"' _ {} \;
-    rm -rf "${GHIDRA_INSTALL_DIR}/support/gradle/.gradle" /root/.gradle
+    find "${GHIDRA_INSTALL_DIR}" -type d -name build -exec sh -c 'rm -rf "$1/objs" "$1/tmp"' _ {} \; || true
+    rm -rf "${GHIDRA_INSTALL_DIR}/support/gradle/.gradle" /root/.gradle || true
 }
 
 if [ "${BUILD_NATIVES}" = "true" ]; then
@@ -189,8 +203,10 @@ fi
 # set permissions for user
 chown -R ${USERNAME}:${USERNAME} ${GHIDRA_INSTALL_DIR}
 
-# Clean up
-rm -rf /tmp/ghidra-tmp
+# Clean up. Gradle worker JVMs can outlive the build for a moment and keep writing to the cache, so a
+# single rm -rf may fail with "Directory not empty" (seen under QEMU-emulated arm64 builds); retry, never fatal.
+for _ in 1 2 3 4 5; do rm -rf /tmp/ghidra-tmp 2>/dev/null && break; sleep 3; done
+rm -rf /tmp/ghidra-tmp 2>/dev/null || true
 
 # Make GHIDRA ENV vars availble to bash and zsh shells
 updaterc "$(cat << EOF

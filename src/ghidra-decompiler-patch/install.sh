@@ -48,7 +48,7 @@ check_packages patch curl ca-certificates gcc g++ make libc6-dev
 
 OWNER="$(stat -c '%U:%G' "${GHIDRA_INSTALL_DIR}")"
 TMP="$(mktemp -d)"
-trap 'rm -rf "${TMP}"' EXIT
+trap 'rm -rf "${TMP}" 2>/dev/null || true' EXIT
 export GRADLE_USER_HOME="${TMP}/gradle"   # keep gradle's cache out of /root and the invoking user's home
 
 apply_patch() {  # $1 = path to patch file, $2 = label
@@ -87,13 +87,13 @@ if [ -e "${GHIDRA_INSTALL_DIR}/support/buildNatives" ]; then
     "${GHIDRA_INSTALL_DIR}/support/buildNatives"          # Ghidra < 11.2
 else
     pushd "${GHIDRA_INSTALL_DIR}/support/gradle/" > /dev/null
-    gradle buildNatives --no-daemon -q
+    gradle buildNatives --no-daemon --no-watch-fs -q
     popd > /dev/null
 fi
 
 # Keep only the executables under build/os/<platform>/; drop objects, temp files and gradle caches.
-find "${GHIDRA_INSTALL_DIR}" -type d -name build -exec sh -c 'rm -rf "$1/objs" "$1/tmp"' _ {} \;
-rm -rf "${GHIDRA_INSTALL_DIR}/support/gradle/.gradle"
+find "${GHIDRA_INSTALL_DIR}" -type d -name build -exec sh -c 'rm -rf "$1/objs" "$1/tmp"' _ {} \; || true
+rm -rf "${GHIDRA_INSTALL_DIR}/support/gradle/.gradle" || true
 chown -R "${OWNER}" "${GHIDRA_INSTALL_DIR}"
 
 echo "Patched decompiler installed:"
